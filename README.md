@@ -55,6 +55,10 @@ demo.py                         # FastAPI demo: text in, decision + reasons out
 
 ## Setup
 
+Requires **Python 3.11.5** (the pinned `torch==2.14.0`/`transformers==5.16.1`
+versions in `requirements.txt` need Python 3.9+; older interpreters like
+the Anaconda base env's 3.7 won't work).
+
 ```bash
 python -m venv .venv
 .venv\Scripts\activate           # Windows PowerShell: .venv\Scripts\Activate.ps1
