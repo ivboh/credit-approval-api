@@ -1,0 +1,10 @@
+# decision_engine itself uses only the standard library. These are for
+# the credit_extraction/ scripts that use Qwen2.5 for field extraction,
+# LoRA fine-tuning, and the LLM/regex hybrid pipeline (including the
+# FastAPI demo in demo.py).
+torch==2.14.0
+transformers==5.16.1
+peft==0.20.0
+accelerate==1.14.0
+fastapi==0.141.1
+uvicorn==0.52.4
