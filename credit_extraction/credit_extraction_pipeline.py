@@ -92,9 +92,24 @@ def load_model():
     else:
         print(f"no local adapter at {adapter_path} -- downloading {HF_ADAPTER_REPO} from the Hugging Face Hub")
         try:
-            # PeftModel.from_pretrained accepts a Hub repo id directly, no
-            # separate download step needed.
-            model = PeftModel.from_pretrained(base_model, HF_ADAPTER_REPO)
+            # The adapter files live inside qwen_credit_lora_adapter/ within
+            # that repo, not at its root. PeftModel.from_pretrained's own
+            # subfolder= param can't be used for this: peft's internal
+            # existence check builds the Hub path with os.path.join(subfolder,
+            # filename), which yields a backslash path on Windows -- the Hub
+            # API only recognizes forward slashes, so the check silently
+            # reports the (real) file missing and the download fails. Fetching
+            # the subfolder ourselves via snapshot_download (which handles
+            # this correctly) and loading from the resulting local directory
+            # sidesteps that bug entirely.
+            from huggingface_hub import snapshot_download
+
+            snapshot_dir = snapshot_download(
+                repo_id=HF_ADAPTER_REPO,
+                allow_patterns=[f"{adapter_path.name}/*"],
+            )
+            hub_adapter_dir = Path(snapshot_dir) / adapter_path.name
+            model = PeftModel.from_pretrained(base_model, str(hub_adapter_dir))
             model.save_pretrained(str(adapter_path))  # cache locally so the next run skips the download
             print(f"downloaded adapter from {HF_ADAPTER_REPO}, cached at {adapter_path}")
         except Exception as e:
